@@ -1,6 +1,6 @@
 # JetFlighter
 
-Dodge the falling bullets.
+Dodge the falling bullets (without rotational movement).
 
 A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
 
