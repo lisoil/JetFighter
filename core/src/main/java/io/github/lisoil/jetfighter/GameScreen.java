@@ -51,13 +51,13 @@ public class GameScreen implements Screen {
 
         jetBlackSprite = new Sprite(jetBlackTexture);
         jetBlackSprite.setSize(1, 1);
-        jetBlackSprite.setOrigin(0.5f,1);
+        jetBlackSprite.setOrigin(jetBlackSprite.getX() + 0.5f,1);
 
         jetBlackSprite.setPosition(1, 0);
 
         jetWhiteSprite = new Sprite(jetWhiteTexture);
         jetWhiteSprite.setSize(1, 1);
-        jetWhiteSprite.setOrigin(0.5f,1);
+        jetWhiteSprite.setOrigin(jetWhiteSprite.getX() + 0.5f,1);
 
         jetWhiteSprite.setPosition(worldWidth - 2, 0);
 
@@ -195,7 +195,13 @@ public class GameScreen implements Screen {
         bulletTimer += delta; // slows bullet spawn rate
         if (bulletTimer > 1f) {
             bulletTimer = 0;
-            createBullet();
+
+            float jetBlackHeadX = jetBlackSprite.getX() + jetBlackSprite.getOriginX();
+            float jetBlackHeadY = jetBlackSprite.getY() + jetBlackSprite.getOriginY();
+            float jetWhiteHeadX = jetWhiteSprite.getX() + jetWhiteSprite.getOriginX();
+            float jetWhiteHeadY = jetWhiteSprite.getY() + jetWhiteSprite.getOriginY();
+
+            createBullet(jetBlackHeadX, jetBlackHeadY, jetWhiteHeadX, jetWhiteHeadY);
         }
 
     }
@@ -227,11 +233,9 @@ public class GameScreen implements Screen {
         game.batch.end();
     }
 
-    private void createBullet() {
+    private void createBullet(float bulletBlackX, float bulletBlackY, float bulletWhiteX, float bulletWhiteY) {
         float bulletWidth = 0.15f;
         float bulletHeight = 0.225f;
-        float worldWidth = game.viewport.getWorldWidth();
-        float worldHeight = game.viewport.getWorldHeight();
 
         Sprite bulletBlackSprite = new Sprite(bulletBlackTexture);
         Sprite bulletWhiteSprite = new Sprite(bulletWhiteTexture);
@@ -239,11 +243,9 @@ public class GameScreen implements Screen {
         bulletBlackSprite.setSize(bulletWidth, bulletHeight);
         bulletWhiteSprite.setSize(bulletWidth, bulletHeight);
 
-        bulletBlackSprite.setX(MathUtils.random(0f, worldWidth - bulletWidth));
-        bulletBlackSprite.setY(worldHeight);
+        bulletBlackSprite.setPosition(bulletBlackX, bulletBlackY);
 
-        bulletWhiteSprite.setX(MathUtils.random(0f, worldWidth - bulletWidth));
-        bulletWhiteSprite.setY(worldHeight);
+        bulletWhiteSprite.setPosition(bulletWhiteX, bulletWhiteY);
 
         bulletBlackSprites.add(bulletBlackSprite);
         bulletWhiteSprites.add(bulletWhiteSprite);
