@@ -51,13 +51,15 @@ public class GameScreen implements Screen {
 
         jetBlackSprite = new Sprite(jetBlackTexture);
         jetBlackSprite.setSize(1, 1);
+        jetBlackSprite.setOrigin(0.5f,1);
 
         jetBlackSprite.setPosition(1, 0);
 
         jetWhiteSprite = new Sprite(jetWhiteTexture);
         jetWhiteSprite.setSize(1, 1);
+        jetWhiteSprite.setOrigin(0.5f,1);
 
-        jetWhiteSprite.setPosition(worldWidth - 2, 0); //Should be somewhere else but can't in creator bc variables
+        jetWhiteSprite.setPosition(worldWidth - 2, 0);
 
         bulletBlackTexture = new Texture("bullet_black.PNG");
         bulletWhiteTexture = new Texture("bullet_white.PNG");
@@ -85,32 +87,47 @@ public class GameScreen implements Screen {
     }
 
     private void input() {
-        float speed = 4.5f;
+        float speed = 5f;
+        float rotationSpeed = 180f;
         float delta = Gdx.graphics.getDeltaTime();
 
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            jetWhiteSprite.translateX(speed * delta);
+        // Convert angle to radians for trigonometric functions
+        float angleWhiteRad = (float) Math.toRadians(jetWhiteSprite.getRotation());
+
+        float directionWhiteX = -(float) Math.sin(angleWhiteRad);
+        float directionWhiteY = (float) Math.cos(angleWhiteRad); // Y movement corresponds to the upward direction
+
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            jetWhiteSprite.rotate(rotationSpeed * delta);
         }
-        else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            jetWhiteSprite.translateX(-speed * delta);
+        else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            jetWhiteSprite.rotate(-rotationSpeed * delta);
         }
+
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            jetWhiteSprite.translateY(speed * delta);
+            jetWhiteSprite.translate(directionWhiteX * speed * delta, directionWhiteY * speed * delta);
         }
         else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            jetWhiteSprite.translateY(-speed * delta);
+            jetWhiteSprite.translate(-directionWhiteX * speed * delta, -directionWhiteY * speed * delta);
         }
+
+        float angleBlackRad = (float) Math.toRadians(jetBlackSprite.getRotation());
+
+        float directionBlackX = -(float) Math.sin(angleBlackRad);
+        float directionBlackY = (float) Math.cos(angleBlackRad);
+
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            jetBlackSprite.translateX(-speed * delta);
+            jetBlackSprite.rotate(rotationSpeed * delta);
         }
         else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            jetBlackSprite.translateX(speed * delta);
+            jetBlackSprite.rotate(-rotationSpeed * delta);
         }
+
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            jetBlackSprite.translateY(speed * delta);
+            jetBlackSprite.translate(directionBlackX * speed * delta, directionBlackY * speed * delta);
         }
         else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            jetBlackSprite.translateY(-speed * delta);
+            jetBlackSprite.translate(-directionBlackX * speed * delta, -directionBlackY * speed * delta);
         }
 
         //If there's a more efficient way of doing that I can't be bothered.
@@ -122,18 +139,18 @@ public class GameScreen implements Screen {
         float jetWidth = jetBlackSprite.getWidth();
         float jetHeight = jetBlackSprite.getHeight();
 
-        jetBlackSprite.setX(MathUtils.clamp(jetBlackSprite.getX(), 0, worldWidth - jetWidth));
-        jetWhiteSprite.setX(MathUtils.clamp(jetWhiteSprite.getX(), 0, worldWidth - jetWidth));
-
-        jetBlackSprite.setY(MathUtils.clamp(jetBlackSprite.getY(), 0, worldHeight - jetHeight));
-        jetWhiteSprite.setY(MathUtils.clamp(jetWhiteSprite.getY(), 0, worldHeight - jetHeight));
-
-        float delta = Gdx.graphics.getDeltaTime();
-
         // applying jet positions and sizes to jetRectangles
         jetBlackRectangle.set(jetBlackSprite.getX(), jetBlackSprite.getY(), jetWidth, jetHeight);
         jetWhiteRectangle.set(jetWhiteSprite.getX(), jetWhiteSprite.getY(), jetWidth, jetHeight);
 
+        // stopping out of bounds (it's good enough I can't be bothered to do math)
+        jetBlackSprite.setX(MathUtils.clamp(jetBlackSprite.getX(), -jetWidth, worldWidth - (jetWidth / 2))); // don't ask why it's (jetWidth / 2) it just is and yes I wrote that myself
+        jetWhiteSprite.setX(MathUtils.clamp(jetWhiteSprite.getX(), -jetWidth, worldWidth - (jetWidth / 2)));
+
+        jetBlackSprite.setY(MathUtils.clamp(jetBlackSprite.getY(), -jetHeight, worldHeight - jetHeight));
+        jetWhiteSprite.setY(MathUtils.clamp(jetWhiteSprite.getY(), -jetHeight, worldHeight - jetHeight));
+
+        float delta = Gdx.graphics.getDeltaTime();
         float bulletSpeed = 3f;
 
         for (int i = bulletBlackSprites.size - 1; i >= 0; i--) {
@@ -222,7 +239,6 @@ public class GameScreen implements Screen {
         bulletBlackSprite.setSize(bulletWidth, bulletHeight);
         bulletWhiteSprite.setSize(bulletWidth, bulletHeight);
 
-//        bulletBlackSprite.setX(0);
         bulletBlackSprite.setX(MathUtils.random(0f, worldWidth - bulletWidth));
         bulletBlackSprite.setY(worldHeight);
 
