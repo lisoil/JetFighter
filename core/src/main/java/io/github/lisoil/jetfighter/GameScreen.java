@@ -28,6 +28,9 @@ public class GameScreen implements Screen {
     Array<Sprite> bulletBlackSprites;
     Array<Sprite> bulletWhiteSprites;
 
+    Sprite bulletBlackSprite;
+    Sprite bulletWhiteSprite;
+
     float bulletTimer;
 
     Rectangle jetBlackRectangle;
@@ -38,6 +41,7 @@ public class GameScreen implements Screen {
 
     int blackHits;
     int whiteHits;
+
 
     public GameScreen(final JetFighter game) {
         this.game = game;
@@ -71,7 +75,6 @@ public class GameScreen implements Screen {
 
         bulletBlackRectangle = new Rectangle();
         bulletWhiteRectangle = new Rectangle();
-
     }
 
     @Override
@@ -151,17 +154,18 @@ public class GameScreen implements Screen {
         jetWhiteSprite.setY(MathUtils.clamp(jetWhiteSprite.getY(), -jetHeight, worldHeight - jetHeight));
 
         float delta = Gdx.graphics.getDeltaTime();
-        float bulletSpeed = 3f;
+        float bulletSpeed = 8f;
 
         for (int i = bulletBlackSprites.size - 1; i >= 0; i--) {
             Sprite bulletBlackSprite = bulletBlackSprites.get(i); //Get sprite from list
             float bulletWidth = bulletBlackSprite.getWidth();
             float bulletHeight = bulletBlackSprite.getHeight();
 
-            bulletBlackSprite.translateY(-bulletSpeed * delta);
+            float directionBlackBulletX = -(float) Math.sin(bulletBlackSprite.getRotation());
+            float directionBlackBulletY = (float) Math.cos(bulletBlackSprite.getRotation());
 
-            // applying bullet position and size to bulletRectangle
-            bulletBlackRectangle.set(bulletBlackSprite.getX(), bulletBlackSprite.getY(), bulletWidth, bulletHeight);
+            bulletBlackSprite.translate( directionBlackBulletX * bulletSpeed * delta, directionBlackBulletY * bulletSpeed * delta);
+            bulletBlackRectangle.setPosition(bulletBlackSprite.getX(), bulletBlackSprite.getY());
 
             // if top of bullet goes out of view remove
             if (bulletBlackSprite.getY() < -bulletHeight) bulletBlackSprites.removeIndex(i);
@@ -170,6 +174,7 @@ public class GameScreen implements Screen {
             else if (jetWhiteRectangle.overlaps(bulletBlackRectangle)) {
                 blackHits++;
                 bulletBlackSprites.removeIndex(i);
+                checkEndGame();
             }
         }
 
@@ -178,9 +183,11 @@ public class GameScreen implements Screen {
             float bulletWidth = bulletWhiteSprite.getWidth();
             float bulletHeight = bulletWhiteSprite.getHeight();
 
-            bulletWhiteSprite.translateY(-bulletSpeed * delta);
+            float directionWhiteBulletX = -(float) Math.sin(bulletWhiteSprite.getRotation());
+            float directionWhiteBulletY = (float) Math.cos(bulletWhiteSprite.getRotation());
 
-            bulletWhiteRectangle.set(bulletWhiteSprite.getX(), bulletWhiteSprite.getY(), bulletWidth, bulletHeight);
+            bulletWhiteSprite.translate( directionWhiteBulletX * bulletSpeed * delta, directionWhiteBulletY * bulletSpeed * delta);
+            bulletWhiteRectangle.setPosition(bulletWhiteSprite.getX(), bulletWhiteSprite.getY());
 
             // if top of bullet goes out of view remove
             if (bulletWhiteSprite.getY() < -bulletHeight) bulletWhiteSprites.removeIndex(i);
@@ -189,6 +196,7 @@ public class GameScreen implements Screen {
             else if (jetBlackRectangle.overlaps(bulletWhiteRectangle)) {
                 whiteHits++;
                 bulletWhiteSprites.removeIndex(i);
+                checkEndGame();
             }
         }
 
@@ -201,7 +209,10 @@ public class GameScreen implements Screen {
             float jetWhiteHeadX = jetWhiteSprite.getX() + jetWhiteSprite.getOriginX();
             float jetWhiteHeadY = jetWhiteSprite.getY() + jetWhiteSprite.getOriginY();
 
-            createBullet(jetBlackHeadX, jetBlackHeadY, jetWhiteHeadX, jetWhiteHeadY);
+            float angleBulletBlackRad = (float) Math.toRadians(jetBlackSprite.getRotation());
+            float angleBulletWhiteRad = (float) Math.toRadians(jetWhiteSprite.getRotation());
+
+            createBullet(jetBlackHeadX, jetBlackHeadY, jetWhiteHeadX, jetWhiteHeadY, angleBulletBlackRad, angleBulletWhiteRad);
         }
 
     }
@@ -233,23 +244,42 @@ public class GameScreen implements Screen {
         game.batch.end();
     }
 
-    private void createBullet(float bulletBlackX, float bulletBlackY, float bulletWhiteX, float bulletWhiteY) {
-        float bulletWidth = 0.15f;
-        float bulletHeight = 0.225f;
+    private void createBullet(float bulletBlackX, float bulletBlackY, float bulletWhiteX, float bulletWhiteY, float bulletBlackDirection, float bulletWhiteDirection) {
+        float bulletWidth = 0.2f;
+        float bulletHeight = 0.2f;
 
-        Sprite bulletBlackSprite = new Sprite(bulletBlackTexture);
-        Sprite bulletWhiteSprite = new Sprite(bulletWhiteTexture);
+        bulletBlackSprite = new Sprite(bulletBlackTexture);
+        bulletWhiteSprite = new Sprite(bulletWhiteTexture);
 
         bulletBlackSprite.setSize(bulletWidth, bulletHeight);
         bulletWhiteSprite.setSize(bulletWidth, bulletHeight);
 
         bulletBlackSprite.setPosition(bulletBlackX, bulletBlackY);
-
         bulletWhiteSprite.setPosition(bulletWhiteX, bulletWhiteY);
+
+        bulletBlackSprite.rotate((float) Math.toDegrees(bulletBlackDirection));
+
+        bulletBlackSprite.setRotation(bulletBlackDirection);
+        bulletWhiteSprite.setRotation(bulletWhiteDirection);
 
         bulletBlackSprites.add(bulletBlackSprite);
         bulletWhiteSprites.add(bulletWhiteSprite);
 
+        // applying bullet position and size to bulletRectangle
+        bulletBlackRectangle.set(bulletBlackSprite.getX(), bulletBlackSprite.getY(), bulletWidth, bulletHeight);
+        bulletWhiteRectangle.set(bulletWhiteSprite.getX(), bulletWhiteSprite.getY(), bulletWidth, bulletHeight);
+
+    }
+
+    private void checkEndGame() {
+        if (whiteHits >= 10) {
+            game.setScreen(new EndMenuScreen(game, "White", blackHits, whiteHits));
+            dispose();
+        }
+        else if (blackHits >= 10) {
+            game.setScreen(new EndMenuScreen(game, "Black", blackHits, whiteHits));
+            dispose();
+        }
     }
 
     @Override
