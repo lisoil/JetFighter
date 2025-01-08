@@ -6,6 +6,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -55,13 +56,13 @@ public class GameScreen implements Screen {
 
         jetBlackSprite = new Sprite(jetBlackTexture);
         jetBlackSprite.setSize(1, 1);
-        jetBlackSprite.setOrigin(jetBlackSprite.getX() + 0.5f,1);
+        jetBlackSprite.setOrigin( 0.5f,1);
 
         jetBlackSprite.setPosition(1, 0);
 
         jetWhiteSprite = new Sprite(jetWhiteTexture);
         jetWhiteSprite.setSize(1, 1);
-        jetWhiteSprite.setOrigin(jetWhiteSprite.getX() + 0.5f,1);
+        jetWhiteSprite.setOrigin(0.5f,1);
 
         jetWhiteSprite.setPosition(worldWidth - 2, 0);
 
@@ -94,18 +95,18 @@ public class GameScreen implements Screen {
         float rotationSpeed = 180f;
         float delta = Gdx.graphics.getDeltaTime();
 
-        // Convert angle to radians for trigonometric functions
-        float angleWhiteRad = (float) Math.toRadians(jetWhiteSprite.getRotation());
-
-        float directionWhiteX = -(float) Math.sin(angleWhiteRad);
-        float directionWhiteY = (float) Math.cos(angleWhiteRad); // Y movement corresponds to the upward direction
-
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             jetWhiteSprite.rotate(rotationSpeed * delta);
         }
         else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             jetWhiteSprite.rotate(-rotationSpeed * delta);
         }
+
+        // Convert angle to radians for trigonometric functions
+        float angleWhiteRad = (float) Math.toRadians(jetWhiteSprite.getRotation());
+
+        float directionWhiteX = -(float) Math.sin(angleWhiteRad);
+        float directionWhiteY = (float) Math.cos(angleWhiteRad); // Y movement corresponds to the upward direction
 
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
             jetWhiteSprite.translate(directionWhiteX * speed * delta, directionWhiteY * speed * delta);
@@ -114,10 +115,6 @@ public class GameScreen implements Screen {
             jetWhiteSprite.translate(-directionWhiteX * speed * delta, -directionWhiteY * speed * delta);
         }
 
-        float angleBlackRad = (float) Math.toRadians(jetBlackSprite.getRotation());
-
-        float directionBlackX = -(float) Math.sin(angleBlackRad);
-        float directionBlackY = (float) Math.cos(angleBlackRad);
 
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             jetBlackSprite.rotate(rotationSpeed * delta);
@@ -125,6 +122,11 @@ public class GameScreen implements Screen {
         else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             jetBlackSprite.rotate(-rotationSpeed * delta);
         }
+
+        float angleBlackRad = (float) Math.toRadians(jetBlackSprite.getRotation());
+
+        float directionBlackX = -(float) Math.sin(angleBlackRad);
+        float directionBlackY = (float) Math.cos(angleBlackRad);
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             jetBlackSprite.translate(directionBlackX * speed * delta, directionBlackY * speed * delta);
@@ -257,7 +259,8 @@ public class GameScreen implements Screen {
         bulletBlackSprite.setPosition(bulletBlackX, bulletBlackY);
         bulletWhiteSprite.setPosition(bulletWhiteX, bulletWhiteY);
 
-        bulletBlackSprite.rotate((float) Math.toDegrees(bulletBlackDirection));
+        bulletBlackSprite.setOrigin(0.5f, 0);
+        bulletWhiteSprite.setOrigin(0.5f, 0);
 
         bulletBlackSprite.setRotation(bulletBlackDirection);
         bulletWhiteSprite.setRotation(bulletWhiteDirection);

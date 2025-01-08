@@ -33,7 +33,7 @@ public class EndMenuScreen implements Screen {
 
         game.batch.begin();
 
-        game.font.draw(game.batch, "Created by Liya", 1, 6f);
+        game.font.draw(game.batch, "Created Jan. 2025 by Liya", 1, 6f);
 
         game.font.draw(game.batch, winner + " jet has won", 1, 4f);
 
