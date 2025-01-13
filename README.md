@@ -8,7 +8,7 @@ This project was generated with a template including simple application launcher
 
 ## How to run
 
-Go to `lwjgl3/build/libs/` and download the latest release `JetFighter-1.0.0.jar`.
+Download the latest release `JetFighter-1.0.0.jar`.
 You must have a JVM installed and use Windows, Linux or Mac OS X for this to work.
 
 ## How to play
