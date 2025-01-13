@@ -1,8 +1,25 @@
 # JetFighter
 
+#### A simple multiplayer shooter game where two jets aim at each other to earn points. First to 10 wins. 
+
 A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
 
 This project was generated with a template including simple application launchers and an `ApplicationAdapter` extension that draws libGDX logo.
+
+## How to run
+
+Go to `lwjgl3/build/libs/` and download the latest release `JetFighter-1.0.0.jar`.
+You must have a JVM installed and use Windows, Linux or Mac OS X for this to work.
+
+## How to play
+
+Use WASD for the black jet and the arrow keys for the white yet.
+
+Pressing **A/left arrow key** and **D/right arrow key** will turn the jet to face left or right, respectively. 
+The jet will only move forward, responding to the **W/up arrow key**, in the direction it is facing.
+**S/down arrow key** moves the jet backwards.
+
+Bullets fire automatically in the direction the jet's head is pointing.
 
 ## Platforms
 
