@@ -6,7 +6,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -76,6 +75,7 @@ public class GameScreen implements Screen {
 
         bulletBlackRectangle = new Rectangle();
         bulletWhiteRectangle = new Rectangle();
+
     }
 
     @Override
@@ -135,7 +135,6 @@ public class GameScreen implements Screen {
             jetBlackSprite.translate(-directionBlackX * speed * delta, -directionBlackY * speed * delta);
         }
 
-        //If there's a more efficient way of doing that I can't be bothered.
     }
 
     private void logic() {
@@ -149,8 +148,8 @@ public class GameScreen implements Screen {
         jetWhiteRectangle.set(jetWhiteSprite.getX(), jetWhiteSprite.getY(), jetWidth, jetHeight);
 
         // stopping out of bounds (it's good enough I can't be bothered to do math)
-        jetBlackSprite.setX(MathUtils.clamp(jetBlackSprite.getX(), -jetWidth, worldWidth - (jetWidth / 2))); // don't ask why it's (jetWidth / 2) it just is and yes I wrote that myself
-        jetWhiteSprite.setX(MathUtils.clamp(jetWhiteSprite.getX(), -jetWidth, worldWidth - (jetWidth / 2)));
+        jetBlackSprite.setX(MathUtils.clamp(jetBlackSprite.getX(), 0 - (jetWidth / 2), worldWidth - (jetWidth / 2))); // don't ask why it's (jetWidth / 2) it just is and yes I wrote that myself
+        jetWhiteSprite.setX(MathUtils.clamp(jetWhiteSprite.getX(), 0 - (jetWidth / 2), worldWidth - (jetWidth / 2)));
 
         jetBlackSprite.setY(MathUtils.clamp(jetBlackSprite.getY(), -jetHeight, worldHeight - jetHeight));
         jetWhiteSprite.setY(MathUtils.clamp(jetWhiteSprite.getY(), -jetHeight, worldHeight - jetHeight));
@@ -216,7 +215,6 @@ public class GameScreen implements Screen {
 
             createBullet(jetBlackHeadX, jetBlackHeadY, jetWhiteHeadX, jetWhiteHeadY, angleBulletBlackRad, angleBulletWhiteRad);
         }
-
     }
 
     private void draw() {
@@ -256,8 +254,8 @@ public class GameScreen implements Screen {
         bulletBlackSprite.setSize(bulletWidth, bulletHeight);
         bulletWhiteSprite.setSize(bulletWidth, bulletHeight);
 
-        bulletBlackSprite.setPosition(bulletBlackX, bulletBlackY);
-        bulletWhiteSprite.setPosition(bulletWhiteX, bulletWhiteY);
+        bulletBlackSprite.setPosition(bulletBlackX - (bulletWidth / 2), bulletBlackY);
+        bulletWhiteSprite.setPosition(bulletWhiteX - (bulletWidth / 2), bulletWhiteY);
 
         bulletBlackSprite.setOrigin(0.5f, 0);
         bulletWhiteSprite.setOrigin(0.5f, 0);
