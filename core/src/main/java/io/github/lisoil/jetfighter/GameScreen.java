@@ -6,16 +6,16 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 
 public class GameScreen implements Screen {
     final JetFighter game;
-
-    Texture bucketTexture;
 
     Texture jetBlackTexture;
     Texture jetWhiteTexture;
@@ -33,20 +33,26 @@ public class GameScreen implements Screen {
 
     float bulletTimer;
 
-    Rectangle jetBlackRectangle;
-    Rectangle jetWhiteRectangle;
+    Polygon jetBlackRectangle;
+    Polygon jetWhiteRectangle;
 
-    Rectangle bulletBlackRectangle;
-    Rectangle bulletWhiteRectangle;
+    Polygon bulletBlackRectangle;
+    Polygon bulletWhiteRectangle;
 
     int blackHits;
     int whiteHits;
 
+    float[] jetVertices;
+    float[] bulletVertices;
+
+    float bulletWidth;
+    float bulletHeight;
+
+    ShapeRenderer shapeRenderer;
+
 
     public GameScreen(final JetFighter game) {
         this.game = game;
-
-        bucketTexture = new Texture("bucket.png");
 
         jetBlackTexture = new Texture("jet_black.PNG");
         jetWhiteTexture = new Texture("jet_white.PNG");
@@ -70,11 +76,33 @@ public class GameScreen implements Screen {
         bulletBlackSprites = new Array<>();
         bulletWhiteSprites = new Array<>();
 
-        jetBlackRectangle = new Rectangle();
-        jetWhiteRectangle = new Rectangle();
+        jetVertices = new float[] {  //y,  x
+            0, 0,  // Bottom-left
+            0, 1,   // Bottom-right
+            1, 1,    // Top-right
+            1, 0    // Top-left
+        };
 
-        bulletBlackRectangle = new Rectangle();
-        bulletWhiteRectangle = new Rectangle();
+        jetBlackRectangle = new Polygon(jetVertices);
+        jetWhiteRectangle = new Polygon(jetVertices);
+
+        jetBlackRectangle.setOrigin(0.5f,1);
+        jetWhiteRectangle.setOrigin(0.5f,1);
+
+        bulletWidth = 0.2f;
+        bulletHeight = 0.2f;
+
+        bulletVertices = new float[] {
+            0, 0,                // Bottom-left
+            bulletWidth, 0,             // Bottom-right
+            bulletWidth, bulletHeight,          // Top-right
+            0, bulletHeight              // Top-left
+        };
+
+        bulletBlackRectangle = new Polygon(bulletVertices);
+        bulletWhiteRectangle = new Polygon(bulletVertices);
+
+        shapeRenderer = new ShapeRenderer();
 
     }
 
@@ -141,11 +169,7 @@ public class GameScreen implements Screen {
         float worldWidth = game.viewport.getWorldWidth();
         float worldHeight = game.viewport.getWorldHeight();
         float jetWidth = jetBlackSprite.getWidth();
-        float jetHeight = jetBlackSprite.getHeight();
-
-        // applying jet positions and sizes to jetRectangles
-        jetBlackRectangle.set(jetBlackSprite.getX(), jetBlackSprite.getY(), jetWidth, jetHeight);
-        jetWhiteRectangle.set(jetWhiteSprite.getX(), jetWhiteSprite.getY(), jetWidth, jetHeight);
+        float jetHeight = jetWhiteSprite.getHeight();
 
         // stopping out of bounds (it's good enough I can't be bothered to do math)
         jetBlackSprite.setX(MathUtils.clamp(jetBlackSprite.getX(), 0 - (jetWidth / 2), worldWidth - (jetWidth / 2))); // don't ask why it's (jetWidth / 2) it just is and yes I wrote that myself
@@ -154,13 +178,19 @@ public class GameScreen implements Screen {
         jetBlackSprite.setY(MathUtils.clamp(jetBlackSprite.getY(), -jetHeight, worldHeight - jetHeight));
         jetWhiteSprite.setY(MathUtils.clamp(jetWhiteSprite.getY(), -jetHeight, worldHeight - jetHeight));
 
+        // applying jet positions and rotations to jetRectangles
+        jetBlackRectangle.setPosition(jetBlackSprite.getX(), jetBlackSprite.getY());
+        jetWhiteRectangle.setPosition(jetWhiteSprite.getX(), jetWhiteSprite.getY());
+
+        jetBlackRectangle.setRotation(jetBlackSprite.getRotation());
+        jetWhiteRectangle.setRotation(jetWhiteSprite.getRotation());
+
         float delta = Gdx.graphics.getDeltaTime();
         float bulletSpeed = 8f;
 
+
         for (int i = bulletBlackSprites.size - 1; i >= 0; i--) {
             Sprite bulletBlackSprite = bulletBlackSprites.get(i); //Get sprite from list
-            float bulletWidth = bulletBlackSprite.getWidth();
-            float bulletHeight = bulletBlackSprite.getHeight();
 
             float directionBlackBulletX = -(float) Math.sin(bulletBlackSprite.getRotation());
             float directionBlackBulletY = (float) Math.cos(bulletBlackSprite.getRotation());
@@ -172,17 +202,16 @@ public class GameScreen implements Screen {
             if (bulletBlackSprite.getY() < -bulletHeight) bulletBlackSprites.removeIndex(i);
             else if (bulletBlackSprite.getX() < -bulletWidth) bulletBlackSprites.removeIndex(i);
             // if collision between black bullets and white jet
-            else if (jetWhiteRectangle.overlaps(bulletBlackRectangle)) {
+            else if (Intersector.overlapConvexPolygons(jetWhiteRectangle, bulletBlackRectangle)) {
                 blackHits++;
                 bulletBlackSprites.removeIndex(i);
+                System.out.println("Black hit white");
                 checkEndGame();
             }
         }
 
         for (int i = bulletWhiteSprites.size - 1; i >= 0; i--) {
             Sprite bulletWhiteSprite = bulletWhiteSprites.get(i);//Get sprite from list
-            float bulletWidth = bulletWhiteSprite.getWidth();
-            float bulletHeight = bulletWhiteSprite.getHeight();
 
             float directionWhiteBulletX = -(float) Math.sin(bulletWhiteSprite.getRotation());
             float directionWhiteBulletY = (float) Math.cos(bulletWhiteSprite.getRotation());
@@ -194,9 +223,10 @@ public class GameScreen implements Screen {
             if (bulletWhiteSprite.getY() < -bulletHeight) bulletWhiteSprites.removeIndex(i);
             else if (bulletWhiteSprite.getX() < -bulletWidth) bulletWhiteSprites.removeIndex(i);
             // if collision between white bullets and black jet
-            else if (jetBlackRectangle.overlaps(bulletWhiteRectangle)) {
+            else if (Intersector.overlapConvexPolygons(jetBlackRectangle, bulletWhiteRectangle)) {
                 whiteHits++;
                 bulletWhiteSprites.removeIndex(i);
+                System.out.println("White hit black");
                 checkEndGame();
             }
         }
@@ -221,6 +251,8 @@ public class GameScreen implements Screen {
         ScreenUtils.clear(Color.GRAY);
         game.viewport.apply();
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
+        shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
+
         game.batch.begin();
 
         float worldWidth = game.viewport.getWorldWidth();
@@ -241,12 +273,21 @@ public class GameScreen implements Screen {
             bulletWhiteSprite.draw(game.batch); //temp
         }
 
+        //Un-commenting this code makes the white bullets disappear (even though they still work) don't ask me why
+        //Draws the hit-boxes
+//        shapeRenderer.begin(ShapeRenderer.ShapeType.Line); // Use ShapeType.Line
+//        shapeRenderer.setColor(Color.RED);
+//        shapeRenderer.polygon(jetBlackRectangle.getTransformedVertices());
+//        shapeRenderer.rect(bulletBlackRectangle.getX(), bulletBlackRectangle.getY(), bulletWidth, bulletHeight);
+//        shapeRenderer.setColor(Color.BLUE);
+//        shapeRenderer.polygon(jetWhiteRectangle.getTransformedVertices());
+//        shapeRenderer.rect(bulletWhiteRectangle.getX(), bulletWhiteRectangle.getY(), bulletWidth, bulletHeight);
+//        shapeRenderer.end();
+
         game.batch.end();
     }
 
     private void createBullet(float bulletBlackX, float bulletBlackY, float bulletWhiteX, float bulletWhiteY, float bulletBlackDirection, float bulletWhiteDirection) {
-        float bulletWidth = 0.2f;
-        float bulletHeight = 0.2f;
 
         bulletBlackSprite = new Sprite(bulletBlackTexture);
         bulletWhiteSprite = new Sprite(bulletWhiteTexture);
@@ -267,8 +308,8 @@ public class GameScreen implements Screen {
         bulletWhiteSprites.add(bulletWhiteSprite);
 
         // applying bullet position and size to bulletRectangle
-        bulletBlackRectangle.set(bulletBlackSprite.getX(), bulletBlackSprite.getY(), bulletWidth, bulletHeight);
-        bulletWhiteRectangle.set(bulletWhiteSprite.getX(), bulletWhiteSprite.getY(), bulletWidth, bulletHeight);
+        bulletBlackRectangle.setPosition(bulletBlackX, bulletBlackY);
+        bulletWhiteRectangle.setPosition(bulletWhiteX, bulletWhiteY);
 
     }
 
