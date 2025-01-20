@@ -253,10 +253,10 @@ public class GameScreen implements Screen {
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
         shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
 
-        game.batch.begin();
-
         float worldWidth = game.viewport.getWorldWidth();
         float worldHeight = game.viewport.getWorldHeight();
+
+        game.batch.begin();
 
 //        game.batch.draw(backgroundTexture, 0, 0, worldWidth, worldHeight); // draw  background (don't have one atm)
         jetBlackSprite.draw(game.batch);
