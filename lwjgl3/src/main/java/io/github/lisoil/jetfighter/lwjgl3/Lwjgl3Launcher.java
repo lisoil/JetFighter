@@ -2,7 +2,6 @@ package io.github.lisoil.jetfighter.lwjgl3;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import io.github.lisoil.jetfighter.GameScreen;
 import io.github.lisoil.jetfighter.JetFighter;
 
 /** Launches the desktop (LWJGL3) application. */
